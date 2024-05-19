@@ -6,18 +6,29 @@ import axios from 'axios';
 const BookMarkContextProvider = ({ children }) => {
   const [bookMarks, setBookMarks] = useState([]);
 
+  async function getBookMarks() {
+    const res = await axios.get(API_URL);
+    setBookMarks(res.data);
+  }
+
+  async function deleteBookMarks(id) {
+    const res = await axios.delete(API_URL + '/' + id);
+    getBookMarks();
+  }
+
+  async function updateBookMarks(id) {
+    const res = await axios.put(API_URL + '/' + id, { title, url });
+    getBookMarks();
+  }
+
   useEffect(() => {
     getBookMarks();
-    async function getBookMarks() {
-      //   const res = await axios.get(API_URL);
-      setBookMarks(res.data);
-    }
   }, []);
 
-  console.log(bookMarks);
-
   return (
-    <BookMarkContext.Provider value={bookMarks}>
+    <BookMarkContext.Provider
+      value={{ bookMarks, getBookMarks, deleteBookMarks }}
+    >
       {children}
     </BookMarkContext.Provider>
   );

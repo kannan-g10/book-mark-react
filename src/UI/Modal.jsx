@@ -1,7 +1,36 @@
-import React from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { BookMarkContext } from '../store/BookMarkContext';
+import axios from 'axios';
+import { API_URL } from '../constants/API_URL';
 
-const Modal = ({ onClose }) => {
+const Modal = ({ onClose, buttonName, bookmark }) => {
+  const { bookMarks, getBookMarks } = useContext(BookMarkContext);
+
+  const [title, setTitle] = useState(bookmark ? bookmark.title : '');
+  const [url, setUrl] = useState(bookmark ? bookmark.url : '');
+
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [bookmark]);
+
+  const handleAddItem = async () => {
+    onClose();
+    if (title == '' || url == '') return;
+    await axios.post(API_URL, { title, url });
+    getBookMarks();
+  };
+
+  const handleUpdate = async () => {
+    onClose();
+    await axios.put(API_URL + '/' + bookmark._id, { title, url });
+    getBookMarks();
+  };
+
   return ReactDOM.createPortal(
     <div className="fixed inset-0 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/75" onClick={onClose}></div>
@@ -12,7 +41,10 @@ const Modal = ({ onClose }) => {
           </label>
           <input
             type="text"
+            ref={inputRef}
             id="title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
             placeholder="Title...."
             className="border-2 mx-3 outline-none px-2 py-1"
           />
@@ -23,6 +55,8 @@ const Modal = ({ onClose }) => {
           </label>
           <input
             type="text"
+            value={url}
+            onChange={e => setUrl(e.target.value)}
             id="url"
             placeholder="Url..."
             className="border-2 mx-3 outline-none px-2 py-1"
@@ -30,9 +64,9 @@ const Modal = ({ onClose }) => {
         </div>
         <button
           className="bg-[#ff305a] hover:bg-[#d7294c] text-white font-semibold text-lg px-5 py-2 rounded-lg"
-          onClick={onClose}
+          onClick={buttonName == 'Add' ? handleAddItem : handleUpdate}
         >
-          Add New
+          {buttonName}
         </button>
       </div>
     </div>,
