@@ -9,6 +9,7 @@ const BookMarkContextProvider = ({ children }) => {
   async function getBookMarks() {
     const res = await axios.get(API_URL);
     setBookMarks(res.data);
+    console.log(bookMarks);
   }
 
   async function deleteBookMarks(id) {
